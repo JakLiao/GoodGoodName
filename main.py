@@ -50,10 +50,10 @@ global_sancai_wuxing_dict = {}
 params = {'surname': FIRST_NAME, 'sex': SEX}
 
 # 首先在http://www.qimingzi.net/ 网站提交基本信息，开始起名，把cookie复制下来
-headers = {"Cookie": "bdshare_firstime=1535117517052; __tins__5033285=%7B%22sid%22%3A%201535177057246%2C%20%22vd%22"
-                     "%3A%201%2C%20%22expires%22%3A%201535178857246%7D; __51cke__=; __51laig__=8; "
-                     "Hm_lvt_4baf75bdd37d2c14c33b580be5423f7f=1535117517; "
-                     "Hm_lpvt_4baf75bdd37d2c14c33b580be5423f7f=1535177058; userSurname=%e5%bb%96; userSex=2; "
+headers = {"Cookie": "bdshare_firstime=1535117517052; Hm_lvt_4baf75bdd37d2c14c33b580be5423f7f=1535117517,1535367603; "
+                     "__tins__5033285=%7B%22sid%22%3A%201535367603157%2C%20%22vd%22%3A%205%2C%20%22expires%22%3A"
+                     "%201535369547084%7D; __51cke__=; __51laig__=5; "
+                     "Hm_lpvt_4baf75bdd37d2c14c33b580be5423f7f=1535367747; userSurname=%e5%bb%96; userSex=2; "
                      "searchType=report; otherPara=%e5%b9%bf%e4%b8%9c%e7%9c%81%e6%b7%b1%e5%9c%b3%7c10%7c%e6%9c%a8%7c"
                      "%3cb%3e%e4%ba%94%e8%a1%8c%e5%88%86%e6%9e%90%3c%2fb%3e%ef%bc%9a%e5%85%ab%e5%ad%97%e8%bf%87%e7%a1"
                      "%ac%ef%bc%8c%e5%85%ab%e5%ad%97%e5%96%9c%e6%9c%a8%ef%bc%8c%e8%b5%b7%e5%90%8d%e6%9c%80%e5%a5%bd"
@@ -369,9 +369,10 @@ def getSancaiData():
     return sancai_wuxing_dict
 
 
-def getSancaiWugeSelection(best_combination):
+def getSancaiWugeSelection(best_combination, debug=False):
     """
     通过三才五格算出的笔画数，找出匹配的名字清单
+    :param debug: 如果是测试的话，仅仅取待选列表第一个字
     :param best_combination:
     :return:
     """
@@ -385,13 +386,14 @@ def getSancaiWugeSelection(best_combination):
         mid_selection = write_num_dict[mid_write_num]
         last_selection = write_num_dict[last_write_num]
 
-        # 仅仅测试下笔画配比
-        # name_set.add(FIRST_NAME + mid_selection[0] + last_selection[0])
-
-        # 所有名字都测试下
-        for m in mid_selection:
-            for l in last_selection:
-                name_set.add(FIRST_NAME + m + l)  # 反过来的话人格和地格就不对了
+        if debug:
+            # 仅仅测试下笔画配比
+            name_set.add(FIRST_NAME + mid_selection[0] + last_selection[0])
+        else:
+            # 所有名字都测试下
+            for m in mid_selection:
+                for l in last_selection:
+                    name_set.add(FIRST_NAME + m + l)  # 反过来的话人格和地格就不对了
     print('三才五格待测试名字列表：', len(name_set), name_set)
     return name_set
 
@@ -426,33 +428,94 @@ def calDictWugeAfter():
             (9, 12), (7, 10), (11, 3), (11, 12)]
 
 
+def mainBestSancaiwuge():
+    """
+    综合计算
+    三才五格 自己算的和网站算的求交集
+    :return:
+    """
+    # 三才五格计算
+    best_wuge_combination = calHaohaoWuge()  # 通过三才五格公式自己算
+    # 网站的优秀三才五格配比
+    best_dict_combination = calDictWugeAfter()  # 通过字典暴力遍历
+
+    # 结合上面的结果晒出列表
+    best_list = []
+    for best in best_wuge_combination:
+        compare_item = (best[0], best[1])
+        if compare_item not in best_dict_combination:
+            continue
+        best_list.append(best)
+    print('综合计算的结果：', len(best_list), best_list)
+
+    sancaiwuge_sel = getSancaiWugeSelection(best_list)
+    calSelection(sancaiwuge_sel)
+
+
+def calFixWord(debug=False, next=False):
+    """
+    名字中固定一个字，再取名
+    :return:
+    """
+    import fix_word
+    fix_write_word = fix_word.fix_write_word
+    fix_write_num = fix_word.fix_write_num
+    write_num_dict = g_selected_write_dict[SELECTED_XITONGSHEN]
+
+    # 经过第一轮测试后的结果复用， 自己记录下来
+    my_write_num_list = [(4, 7), (7, 10)]
+
+    write_num_list = []
+    name_set = set()
+    for num in range(MIN_SINGLE_NUM, MAX_SINGLE_NUM+1):
+        if next:
+            if (fix_write_num, num) not in my_write_num_list:
+                continue
+
+        # 固定名字第一个
+        write_num_list.append((fix_write_num, num))
+        last_write_num = num
+        if last_write_num not in write_num_dict:
+            continue
+        last_selection = write_num_dict[last_write_num]
+        if debug:
+            # 仅仅测试下笔画配比
+            name_set.add(FIRST_NAME + fix_write_word + last_selection[0])
+        else:
+            # 所有名字都测试下
+            for l in last_selection:
+                name_set.add(FIRST_NAME + fix_write_word + l)
+
+    for num in range(MIN_SINGLE_NUM, MAX_SINGLE_NUM + 1):
+        if next:
+            if (num, fix_write_num) not in my_write_num_list:
+                continue
+        # 固定名字第二个
+        write_num_list.append((num, fix_write_num))
+        mid_write_num = num
+        if mid_write_num not in write_num_dict:
+            continue
+        mid_selection = write_num_dict[mid_write_num]
+
+        if debug:
+            # 仅仅测试下笔画配比
+            name_set.add(FIRST_NAME + mid_selection[0] + fix_write_word)
+        else:
+            # 所有名字都测试下
+            for m in mid_selection:
+                name_set.add(FIRST_NAME + m + fix_write_word)
+
+    print('待测试的名字笔画列表：', len(write_num_list), write_num_list)
+    print('待测试的名字列表：', len(name_set), name_set)
+    calSelection(name_set)
+
+
 def start():
     global global_sancai_wuxing_dict
     global_sancai_wuxing_dict = getSancaiData()
     try:
-        # 三才五格计算
-        best_wuge_combination = calHaohaoWuge()  # 通过三才五格公式自己算
-        # 网站的优秀三才五格配比
-        best_dict_combination = calDictWugeAfter()  # 通过字典暴力遍历
-
-        # 结合上面的结果晒出列表
-        best_list = []
-        for best in best_wuge_combination:
-            compare_item = (best[0], best[1])
-            if compare_item not in best_dict_combination:
-                continue
-            best_list.append(best)
-        print('综合计算的结果：', len(best_list), best_list)
-
-        sancaiwuge_sel = getSancaiWugeSelection(best_list)
-        calSelection(sancaiwuge_sel)
-
-        # 喜用神计算
-        # best_xiyongshen_combination = calHaohaoXiyongshen()  # 好好没有超好的结果
-
-        # 个性化计算
-        # wife_sel = getMyWifeSelection()
-        # calSelection(wife_sel)
+        # mainBestSancaiwuge()
+        calFixWord(debug=False, next=True)
     except Exception as e:
         traceback.print_exc()
         print('Have a rest, then continue...')
