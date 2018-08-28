@@ -252,6 +252,9 @@ def calHaohaoXiyongshen():
     参考：https://www.lnka.cn/article/topic2285.html
     :return:
     """
+    if not SELECTED_XITONGSHEN:
+        print('必须先在config.py中配置喜用神')
+        return None
     best_xiyongshen_combination = []
     best_num_combination = calHaohaoWuge(False)
 
@@ -346,13 +349,30 @@ def getSancaiData():
     return sancai_wuxing_dict
 
 
+def getWriteNumDict():
+    """
+    根据五行找字典中的字。如果配置为None则全部都选。
+    :return:
+    """
+    if SELECTED_XITONGSHEN:
+        return g_selected_write_dict[SELECTED_XITONGSHEN]
+    else:
+        write_num_dict = dict()
+        for _, wdict in g_selected_write_dict.items():
+            for num, word_list in wdict.items():
+                if num not in write_num_dict:
+                    write_num_dict[num] = []
+                write_num_dict[num] += word_list
+        return write_num_dict
+
+
 def getSancaiWugeSelection(best_combination):
     """
     通过三才五格算出的笔画数，找出匹配的名字清单
     :param best_combination:
     :return:
     """
-    write_num_dict = g_selected_write_dict[SELECTED_XITONGSHEN]
+    write_num_dict = getWriteNumDict()
     name_set = set()
     for x in best_combination:
         mid_write_num = x[0]
@@ -383,7 +403,7 @@ def calDictWuge():
     :return:
     """
     combination = []
-    write_num_dict = g_selected_write_dict[SELECTED_XITONGSHEN]
+    write_num_dict = getWriteNumDict()
     for write_num1, _ in write_num_dict.items():
         if write_num1 < MIN_SINGLE_NUM or write_num1 > MAX_SINGLE_NUM:
             continue
@@ -428,23 +448,20 @@ def mainBestSancaiwuge():
     calSelection(sancaiwuge_sel)
 
 
-def calFixWord(next=False):
+def calFixWord(again=False):
     """
     名字中固定一个字，再取名
     :return:
     """
     fix_write_word = config.fix_write_word
     fix_write_num = config.fix_write_num
-    write_num_dict = g_selected_write_dict[SELECTED_XITONGSHEN]
-
-    # 经过第一轮测试后的结果复用， 自己记录下来
-    my_write_num_list = [(4, 7), (7, 10)]
+    write_num_dict = getWriteNumDict()
 
     write_num_list = []
     name_set = set()
     for num in range(MIN_SINGLE_NUM, MAX_SINGLE_NUM + 1):
-        if next:
-            if (fix_write_num, num) not in my_write_num_list:
+        if again:
+            if (fix_write_num, num) not in config.my_write_num_list:
                 continue
 
         # 固定名字第一个
@@ -462,8 +479,8 @@ def calFixWord(next=False):
                 name_set.add(FIRST_NAME + fix_write_word + l)
 
     for num in range(MIN_SINGLE_NUM, MAX_SINGLE_NUM + 1):
-        if next:
-            if (num, fix_write_num) not in my_write_num_list:
+        if again:
+            if (num, fix_write_num) not in config.my_write_num_list:
                 continue
         # 固定名字第二个
         write_num_list.append((num, fix_write_num))
@@ -490,7 +507,7 @@ def start():
     g_sancai_wuxing_dict = getSancaiData()
     try:
         # mainBestSancaiwuge()
-        calFixWord(next=False)
+        calFixWord(again=True)
     except Exception as e:
         traceback.print_exc()
         print('Have a rest, then continue...')

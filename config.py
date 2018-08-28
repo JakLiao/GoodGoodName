@@ -1,5 +1,6 @@
 
-debug = True
+debug = False
+my_write_num_list = [(7, 10)]  # 经过第一轮测试后笔画的结果， 自己记录下来
 true_request = True  # 真实请求测试
 
 FIRST_NAME = '廖'  # 姓氏
@@ -20,7 +21,7 @@ SELECTED_SANCAI = ['大吉', '中吉']  # 三才中，如果为None就不特意�
 '''
 这个喜用神自己在网站查查
 '''
-SELECTED_XITONGSHEN = '木'  # 已知的喜用神
+SELECTED_XITONGSHEN = None  # 已知的喜用神，或者次喜用神。None表示没关系
 
 # 首先在http://www.qimingzi.net/ 网站提交基本信息，点击开始起名，F12查看请求信息把Cookie复制下来
 year = 2018
