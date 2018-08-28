@@ -3,7 +3,10 @@
 import random
 import traceback
 
+import config
 import constants
+from config import FIRST_NAME, FIRST_NAME_WRITE_NUM, MIN_SINGLE_NUM, MAX_SINGLE_NUM, SEX, THRESHOLD_SCORE, \
+    SELECTED_SANCAI, SELECTED_XITONGSHEN, headers
 
 __author__ = 'HaoHao de Father'
 
@@ -16,6 +19,7 @@ from urllib import request
 from urllib import parse
 import self_wuxing_dict as w  # 自选用 self_wuxing_dict ，全集用 wuxing_dict
 
+g_sancai_wuxing_dict = {}
 g_selected_write_dict = {
     '水': w.shui_dict,
     '火': w.huo_dict,
@@ -26,41 +30,12 @@ g_selected_write_dict = {
 names_url = "http://www.qimingzi.net/showNames.aspx"
 base_url = "http://www.qimingzi.net/"
 
-FIRST_NAME = '廖'  # 姓氏
-FIRST_NAME_WRITE_NUM = 14  # 康熙字典乾隆字典的笔画，其他不算
-
-MIN_SINGLE_NUM = 2  # 单个字最少笔画过滤
-MAX_SINGLE_NUM = 20  # 单个字最多笔画过滤
 RESULT_UNKNOWN = '结果未知'
-SELECTED_SANCAI = ['大吉', '中吉']  # 如果为None就不特意选最好的
 
-SEX = '女'  # 男 或者 女
 RESULT_FILE = 'name.txt'  # 结果算到的好名字
 TESTED_FILE = 'name_tested.txt'  # 已经在网站测试过的名字
 SANCAI_FILE = 'sancai.txt'  # 三才五行参考结语
-THRESHOLD_SCORE = 85  # 三才五格测试最低能接受的得分
-
-'''
-这个喜用神自己在网站查查
-'''
-SELECTED_XITONGSHEN = '木'  # 已知的喜用神
-
-global_sancai_wuxing_dict = {}
-
 params = {'surname': FIRST_NAME, 'sex': SEX}
-
-# 首先在http://www.qimingzi.net/ 网站提交基本信息，开始起名，把cookie复制下来
-headers = {"Cookie": "bdshare_firstime=1535117517052; Hm_lvt_4baf75bdd37d2c14c33b580be5423f7f=1535117517,1535367603; "
-                     "__tins__5033285=%7B%22sid%22%3A%201535367603157%2C%20%22vd%22%3A%205%2C%20%22expires%22%3A"
-                     "%201535369547084%7D; __51cke__=; __51laig__=5; "
-                     "Hm_lpvt_4baf75bdd37d2c14c33b580be5423f7f=1535367747; userSurname=%e5%bb%96; userSex=2; "
-                     "searchType=report; otherPara=%e5%b9%bf%e4%b8%9c%e7%9c%81%e6%b7%b1%e5%9c%b3%7c10%7c%e6%9c%a8%7c"
-                     "%3cb%3e%e4%ba%94%e8%a1%8c%e5%88%86%e6%9e%90%3c%2fb%3e%ef%bc%9a%e5%85%ab%e5%ad%97%e8%bf%87%e7%a1"
-                     "%ac%ef%bc%8c%e5%85%ab%e5%ad%97%e5%96%9c%e6%9c%a8%ef%bc%8c%e8%b5%b7%e5%90%8d%e6%9c%80%e5%a5%bd"
-                     "%e7%94%a8%e4%ba%94%e8%a1%8c%e5%b1%9e%e6%80%a7%e4%b8%ba%e3%80%8c%3cfont+color%3d0033FF%3e%3cb%3e"
-                     "%e6%9c%a8%3c%2fb%3e%3c%2ffont%3e%e3%80%8d%e7%9a%84%e5%ad%97%3cbr%3e; year=2018; month=8; "
-                     "date=19; hour=18; minute=25",
-           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:61.0) Gecko/20100101 Firefox/61.0"}
 
 
 def getHtml(url, req_params=None, req_headers=None):
@@ -260,8 +235,8 @@ def calHoahaoSancai(tian_ge, ren_ge, di_ge):
     :return:
     """
     sancai = getSancaiWuxing(tian_ge) + getSancaiWuxing(ren_ge) + getSancaiWuxing(di_ge)
-    if sancai in global_sancai_wuxing_dict:
-        data = global_sancai_wuxing_dict[sancai]
+    if sancai in g_sancai_wuxing_dict:
+        data = g_sancai_wuxing_dict[sancai]
         return sancai, data['result'], data['evaluate']
     else:
         return sancai, RESULT_UNKNOWN, None
@@ -311,6 +286,8 @@ def calSelection(name_list):
     :param name_list:
     :return:
     """
+    if not config.true_request:
+        return
     already_tested_dict = getTestedDict()
     for name in name_list:
         if name in already_tested_dict:
@@ -369,10 +346,9 @@ def getSancaiData():
     return sancai_wuxing_dict
 
 
-def getSancaiWugeSelection(best_combination, debug=False):
+def getSancaiWugeSelection(best_combination):
     """
     通过三才五格算出的笔画数，找出匹配的名字清单
-    :param debug: 如果是测试的话，仅仅取待选列表第一个字
     :param best_combination:
     :return:
     """
@@ -386,7 +362,7 @@ def getSancaiWugeSelection(best_combination, debug=False):
         mid_selection = write_num_dict[mid_write_num]
         last_selection = write_num_dict[last_write_num]
 
-        if debug:
+        if config.debug:
             # 仅仅测试下笔画配比
             name_set.add(FIRST_NAME + mid_selection[0] + last_selection[0])
         else:
@@ -452,14 +428,13 @@ def mainBestSancaiwuge():
     calSelection(sancaiwuge_sel)
 
 
-def calFixWord(debug=False, next=False):
+def calFixWord(next=False):
     """
     名字中固定一个字，再取名
     :return:
     """
-    import fix_word
-    fix_write_word = fix_word.fix_write_word
-    fix_write_num = fix_word.fix_write_num
+    fix_write_word = config.fix_write_word
+    fix_write_num = config.fix_write_num
     write_num_dict = g_selected_write_dict[SELECTED_XITONGSHEN]
 
     # 经过第一轮测试后的结果复用， 自己记录下来
@@ -467,7 +442,7 @@ def calFixWord(debug=False, next=False):
 
     write_num_list = []
     name_set = set()
-    for num in range(MIN_SINGLE_NUM, MAX_SINGLE_NUM+1):
+    for num in range(MIN_SINGLE_NUM, MAX_SINGLE_NUM + 1):
         if next:
             if (fix_write_num, num) not in my_write_num_list:
                 continue
@@ -478,7 +453,7 @@ def calFixWord(debug=False, next=False):
         if last_write_num not in write_num_dict:
             continue
         last_selection = write_num_dict[last_write_num]
-        if debug:
+        if config.debug:
             # 仅仅测试下笔画配比
             name_set.add(FIRST_NAME + fix_write_word + last_selection[0])
         else:
@@ -497,7 +472,7 @@ def calFixWord(debug=False, next=False):
             continue
         mid_selection = write_num_dict[mid_write_num]
 
-        if debug:
+        if config.debug:
             # 仅仅测试下笔画配比
             name_set.add(FIRST_NAME + mid_selection[0] + fix_write_word)
         else:
@@ -511,11 +486,11 @@ def calFixWord(debug=False, next=False):
 
 
 def start():
-    global global_sancai_wuxing_dict
-    global_sancai_wuxing_dict = getSancaiData()
+    global g_sancai_wuxing_dict
+    g_sancai_wuxing_dict = getSancaiData()
     try:
         # mainBestSancaiwuge()
-        calFixWord(debug=False, next=True)
+        calFixWord(next=False)
     except Exception as e:
         traceback.print_exc()
         print('Have a rest, then continue...')
