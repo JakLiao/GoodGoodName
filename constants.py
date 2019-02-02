@@ -18,12 +18,16 @@ SANCAI_stubbon = [7, 17, 18, 25, 27, 28, 37, 47]  # 刚情运暗示数（性刚�
 SANCAI_gentle = [5, 6, 11, 15, 16, 24, 31, 32, 35]  # 温和运暗示数（性情平和,能得上下信望）
 
 # 可以自己配置觉得好的数字
+# 参考好的搭配
 refer_good_num_list = [SANCAI_jixiang, SANCAI_xiaoji, SANCAI_wise, SANCAI_wealth, SANCAI_artist, SANCAI_goodwife,
                        SANCAI_merry, SANCAI_gentle]
+# 自己设定的好的搭配
 good_num_list = [SANCAI_jixiang, SANCAI_xiaoji, SANCAI_wise, SANCAI_wealth, SANCAI_artist, SANCAI_goodwife,
                  SANCAI_merry, SANCAI_gentle]
 
+# 参考坏的搭配
 refer_bad_num_list = [SANCAI_xiong, SANCAI_death, SANCAI_alone, SANCAI_stubbon]
+# 自己设定的坏的搭配
 bad_num_list = [SANCAI_xiong, SANCAI_death, SANCAI_alone]
 
 good_num_set = set(reduce((lambda x, y: x + y), good_num_list, []))
@@ -33,3 +37,5 @@ print('五格差分值:', bad_num_set)
 # 筛选出有好没坏的三才五格
 best_num_set = [x for x in good_num_set if x not in bad_num_set]
 print('想要的三才五格数字:', best_num_set)
+
+RESULT_UNKNOWN = '结果未知'
