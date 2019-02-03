@@ -4,9 +4,6 @@ import requests
 from conf import config, constants
 from data import full_wuxing_dict as fwd
 from conf.config import MIN_SINGLE_NUM, MAX_SINGLE_NUM, SEX, THRESHOLD_SCORE
-import urllib
-from http import cookiejar
-from urllib import request
 
 TESTED_FILE = 'result/name_tested.txt'  # 已经在网站测试过的名字
 RESULT_FILE = 'result/name.txt'  # 结果算到的好名字
@@ -73,25 +70,6 @@ def writeDown(result, file_name):
         f.write(result)
         f.write('\n')
     return True
-
-
-def getCookie(url):
-    cj = cookiejar.LWPCookieJar()
-    handler = urllib.request.HTTPCookieProcessor(cj)
-    opener = urllib.request.build_opener(handler)
-    urllib.request.install_opener(opener)
-    r = urllib.request.Request(url)
-    result = opener.open(r)
-    print(result.read())
-
-    ret = ''
-    if cj:
-        for ck in cj:
-            print(ck.name, ck.value)
-            ret = (ck.name + "=" + ck.value) + ";" + ret
-        return ret
-    else:
-        return 'no cookie founded'
 
 
 def getHtml(url, req_params=None, req_headers=None):

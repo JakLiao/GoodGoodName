@@ -69,7 +69,7 @@ def calHaohaoWuge(verbose=True):
         if zong_ge not in constants.best_num_set or wai_ge not in constants.best_num_set:
             continue
         # 计算三才
-        sancai, sancai_result, sancai_evaluate = calHoahaoSancai(tian_ge, ren_ge, di_ge)
+        sancai, sancai_result, _ = calHoahaoSancai(tian_ge, ren_ge, di_ge)
         if '凶' in sancai_result or sancai_result == constants.RESULT_UNKNOWN:
             # print('过滤判断为凶或未知的三才：', sancai, sancai_result)
             continue
