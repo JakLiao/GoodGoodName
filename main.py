@@ -4,12 +4,11 @@ __author__ = 'HaoHao de Father'
 import random
 import traceback
 from collections import defaultdict
-import config
-import constants
-from config import LAST_NAME, MIN_SINGLE_NUM, MAX_SINGLE_NUM, SELECTED_SANCAI, SELECTED_XITONGSHEN
+from conf import config, constants
+from conf.config import LAST_NAME, MIN_SINGLE_NUM, MAX_SINGLE_NUM, SELECTED_SANCAI, SELECTED_XITONGSHEN
 import utils
 import time
-import self_wuxing_dict as w  # 自选用 self_wuxing_dict ，全集用 wuxing_dict
+from data import self_wuxing_dict as w
 
 g_sancai_wuxing_dict = {}
 g_baijiaxing_dict = {}  # 百家姓最佳搭配

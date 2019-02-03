@@ -1,18 +1,17 @@
 from collections import defaultdict
 from urllib import parse
 import requests
-import constants
-import config
-import full_wuxing_dict as fwd
-from config import MIN_SINGLE_NUM, MAX_SINGLE_NUM, SEX, THRESHOLD_SCORE
+from conf import config, constants
+from data import full_wuxing_dict as fwd
+from conf.config import MIN_SINGLE_NUM, MAX_SINGLE_NUM, SEX, THRESHOLD_SCORE
 import urllib
 from http import cookiejar
 from urllib import request
 
-TESTED_FILE = 'name_tested.txt'  # 已经在网站测试过的名字
-RESULT_FILE = 'name.txt'  # 结果算到的好名字
-SANCAI_FILE = 'sancai.txt'  # 三才五行参考结语
-BAIJIAXING_FILE = 'baijiaxing.txt'  # 百家姓最佳搭配
+TESTED_FILE = 'result/name_tested.txt'  # 已经在网站测试过的名字
+RESULT_FILE = 'result/name.txt'  # 结果算到的好名字
+SANCAI_FILE = 'data/sancai.txt'  # 三才五行参考结语
+BAIJIAXING_FILE = 'data/baijiaxing.txt'  # 百家姓最佳搭配
 
 
 def getTestedDict():
