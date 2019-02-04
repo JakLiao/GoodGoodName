@@ -1,0 +1,12 @@
+[run]
+omit=*/venv/*
+disable_warnings = no-data-collected
+branch = True
+
+[paths]
+source =
+   .tox/*/lib/python*/site-packages/GoodGoodName
+   .tox/pypy/site-packages/GoodGoodName
+
+[report]
+show_missing = True
