@@ -1,6 +1,8 @@
 好好起名(Name)
 ========
 
+[![Build Status](https://travis-ci.org/JakLiao/GoodGoodName.svg?branch=master)](https://travis-ci.org/JakLiao/GoodGoodName)
+
 # 写在开头
 
 这是为了我的宝宝起名写的程序，宝宝小名好好。
