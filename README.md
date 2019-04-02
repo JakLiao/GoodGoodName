@@ -2,6 +2,7 @@
 ========
 
 [![Build Status](https://travis-ci.org/JakLiao/GoodGoodName.svg?branch=master)](https://travis-ci.org/JakLiao/GoodGoodName)
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
 # 写在开头
 
