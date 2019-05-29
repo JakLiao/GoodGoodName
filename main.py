@@ -2,6 +2,7 @@
 # -*-coding:utf-8-*-
 __author__ = 'HaoHao de Father'
 import random
+import sys
 import traceback
 from collections import defaultdict
 from conf import config, constants
@@ -19,6 +20,11 @@ g_selected_write_dict = {
     '金': w.jin_dict,
     '土': w.tu_dict
 }
+
+if config.LAST_NAME not in utils.FULL_WORD_COUNT_DICT:
+    print('Oops! {0} doesnot found in dictionary.Try to search your word:{0} on web: http://xm.99166.com/wxhz/ , '
+          'and add to full_wuxing_dict.py'.format(config.LAST_NAME))
+    sys.exit(0)
 g_last_name_write_num = utils.FULL_WORD_COUNT_DICT[config.LAST_NAME]
 
 
