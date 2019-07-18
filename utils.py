@@ -93,6 +93,7 @@ def getHtml(url, req_params=None, req_headers=None):
         # return response.decode('gb2312', 'ignore')
     except requests.RequestException:
         print('Oops! Timeout Error! Sorry!')
+        return None
 
 
 def getScore(name):
@@ -110,6 +111,8 @@ def getScore(name):
     s = parse.quote(SEX.encode('gb2312'))
     detail_url = "http://www.qimingzi.net/simpleReport.aspx?surname=" + surname + "&name=" + lastname + "&sex=" + s
     html = getHtml(detail_url)
+    if not html:
+        return
 
     first_tag = '<div class="fenshu">'
     last_tag = '</div><a name="zhuanye">'
